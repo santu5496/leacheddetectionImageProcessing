@@ -1,12 +1,17 @@
 import sqlite3
 from sqlite3 import OperationalError
-from flask import Flask, request, jsonify
-#from PIL import Image
+from flask import Flask, request, jsonify, render_template
+from PIL import Image
 import numpy as np
 import torch
 import torchvision.transforms as transforms
 from model import CNN
+import os
+
 app = Flask(__name__)
+
+# Setup for template and static folder
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # Database setup
 DATABASE = 'users.db'
@@ -14,7 +19,7 @@ DATABASE = 'users.db'
 # Load the model
 try:
     model = CNN()
-    #model.load_state_dict(torch.load('model_weights.pth'))
+    model.load_state_dict(torch.load('model_weights.pth', map_location=torch.device('cpu')))
     print("Model weights loaded successfully.")
 except Exception as e:
     model = None
@@ -39,12 +44,17 @@ def add_user(username, password):
     with get_db() as db:
         db.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         db.commit()
+
 def check_user(username, password):
     with get_db() as db:
         cursor = db.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
         return cursor.fetchone() is not None
 
 init_db()
+
+@app.route('/')
+def home():
+    return render_template('login.html')
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -71,10 +81,6 @@ def register():
         return jsonify({'message': 'Username already exists'}), 400
     except OperationalError:
         return jsonify({'message': 'Database is locked'}), 400
-
-@app.route('/predict', methods=['GET'])
-def predict():
-    return 'ok'
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -110,3 +116,6 @@ def upload_file():
             return jsonify({'message': 'File successfully processed', 'prediction': prediction_result}), 200
         except Exception as e:
             return jsonify({'message': f'Error processing file: {str(e)}'}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)

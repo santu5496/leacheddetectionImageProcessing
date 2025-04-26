@@ -3,7 +3,6 @@ import sqlite3
 from sqlite3 import OperationalError
 from flask import Flask, request, jsonify, render_template
 from PIL import Image
-import numpy as np
 import torch
 import torchvision.transforms as transforms
 from model import CNN
@@ -13,17 +12,52 @@ app = Flask(__name__)
 # Database setup
 DATABASE = 'users.db'
 
-# Load model
-model_weights_path = r'C:\Users\hpatil\source\repos\santu5496\leacheddetectionImageProcessing\model_weights.pth'
+# Define path for the model weights using relative path
+model_weights_path = os.path.join(os.path.dirname(__file__), 'model_weights.pth')
 
-try:
-    model = CNN()
-    model.load_state_dict(torch.load(model_weights_path, map_location=torch.device('cpu')))
-    model.eval()
-    print("✅ Model weights loaded successfully.")
-except Exception as e:
-    model = None
-    print(f"❌ Error loading model: {e}")
+# Global model variable
+model = None
+
+# Function to initialize model
+def initialize_model():
+    global model
+    try:
+        # Check if weights file exists and is not empty
+        if os.path.exists(model_weights_path) and os.path.getsize(model_weights_path) > 0:
+            print(f"Found model weights at {model_weights_path}")
+            
+            # Initialize model
+            model = CNN()
+            
+            try:
+                # Attempt to load weights
+                model.load_state_dict(torch.load(model_weights_path, map_location=torch.device('cpu')))
+                model.eval()  # Set model to evaluation mode
+                print("✅ Model weights loaded successfully.")
+                return True
+            except EOFError:
+                print("❌ Error: Model weights file is corrupted or empty.")
+            except Exception as e:
+                print(f"❌ Error loading model weights: {str(e)}")
+                import traceback
+                print(f"Error details:\n{traceback.format_exc()}")
+        else:
+            print(f"❌ Error: Model weights file not found or empty at {model_weights_path}")
+            
+        # Create new model if loading failed
+        print("⚠️ Initializing model without pre-trained weights.")
+        model = CNN()
+        model.eval()
+        return True
+        
+    except Exception as e:
+        print(f"❌ Critical error initializing model: {str(e)}")
+        import traceback
+        print(f"Error details:\n{traceback.format_exc()}")
+        return False
+
+# Initialize model
+model_initialized = initialize_model()
 
 # Database functions
 def get_db():
@@ -55,7 +89,6 @@ def check_user(username, password):
 init_db()
 
 # Routes
-
 @app.route('/', methods=['GET'])
 def index():
     return render_template('login.html')
@@ -91,16 +124,18 @@ def login():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    if not model_initialized:
+        return jsonify({'message': 'Model initialization failed. Service unavailable.'}), 503
+        
     if 'file' not in request.files:
         return jsonify({'message': 'No file part in the request'}), 400
+        
     file = request.files['file']
     if file.filename == '':
         return jsonify({'message': 'No selected file'}), 400
-    if model is None:
-        return jsonify({'message': 'Model not loaded'}), 500
 
     try:
-        # Preprocess image
+        # Open the image file and apply transformations
         img = Image.open(file).convert('RGB').resize((224, 224))
         transform = transforms.Compose([
             transforms.ToTensor(),
@@ -109,27 +144,50 @@ def upload_file():
         ])
         tensor = transform(img).unsqueeze(0)
 
-        # Debug print statements
         print("Tensor shape:", tensor.shape)
 
-        # Model prediction
         with torch.no_grad():
+            # Make the prediction
             prediction = model(tensor)
             print("Raw prediction output:", prediction)
 
-        prediction_result = float(prediction[0][0].item())  # Extracting the scalar value
-
-        # Classify based on the prediction
-        if prediction_result >= 0.5:
-            prediction_label = 'Leprosy Detected'
-        else:
-            prediction_label = 'No Leprosy'
-
-        return jsonify({'message': 'File successfully processed', 'prediction': prediction_label, 'confidence': prediction_result}), 200
+        prediction_result = float(prediction[0][0].item())
+        
+        # Determine if image is leached based on prediction
+        # Adjust threshold as needed based on your model's training
+        threshold = 0.5
+        is_leached = prediction_result > threshold
+        
+        result_message = "Leached detected" if is_leached else "No leaching detected"
+        
+        return jsonify({
+            'message': 'File successfully processed', 
+            'prediction': prediction_result,
+            'is_leached': is_leached,
+            'result': result_message
+        }), 200
 
     except Exception as e:
-        print("❌ Upload error:", e)
+        print("❌ Upload error:", str(e))
+        import traceback
+        print(f"Error details:\n{traceback.format_exc()}")
         return jsonify({'message': f'Error processing file: {str(e)}'}), 500
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    status = {
+        'status': 'ok' if model_initialized else 'degraded',
+        'model_initialized': model_initialized,
+        'model_weights_loaded': os.path.exists(model_weights_path) and os.path.getsize(model_weights_path) > 0
+    }
+    return jsonify(status)
+
+# Training endpoint (placeholder for future implementation)
+@app.route('/train', methods=['POST'])
+def train_model():
+    # This would be where you could implement model training functionality
+    return jsonify({'message': 'Training endpoint not yet implemented'}), 501
 
 # Run the Flask app
 if __name__ == '__main__':

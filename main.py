@@ -9,7 +9,8 @@ def index():
     return send_file('src/index.html')
 
 def main():
-    app.run(port=int(os.environ.get('PORT', 80)))
+    # Change the port to 5000 or another non-privileged port
+    app.run(port=int(os.environ.get('PORT', 5000)))
 
 if __name__ == "__main__":
     main()

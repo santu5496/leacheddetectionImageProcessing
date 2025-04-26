@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+    <title>Hello1 World</title>
+    <style>
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+        #registration-form {
+          display: none; /* Hide by default */
+        }
+      </style>
+  </head>
+  <body>
+    
+    <h1>Login</h1>
+    <a href="#" id="show-login" style="display: none;">Login</a>
+    <div id="error-message" class="error-message"></div>
+    
+    <form id="login-form">
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" id="login-username" name="username" required />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="login-password" name="password" required />
+      </div>
+      <a href="#" id="show-registration">Register</a>
+      <button type="submit">Login</button>
+    </form>
+    
+    <form id="registration-form">
+      <h1>Registration</h1>
+      <div id="register-error-message" class="error-message"></div>
+      <div>
+        <label for="register-username">Username:</label>
+        <input type="text" id="register-username" name="username" required/>
+      </div>
+      <div>
+        <label for="register-password">Password:</label>
+        <input type="password" id="register-password" name="password" required/>
+      </div>
+      <button type="submit">Register</button>
+    </form>
+    <script>
+      let testCount = 0;
+      let testPassCount = 0;
+      const loginForm = document.getElementById('login-form');
+      const errorMessage = document.getElementById('error-message');
+
+      loginForm.addEventListener('submit', async (event) => {
+         event.preventDefault();
+
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          errorMessage.textContent = data.message;
+        } else {
+          errorMessage.textContent = ''; // Clear any previous error messages
+          window.location.href = 'home.html';
+        }
+      });
+      const registrationForm = document.getElementById('registration-form');
+      const registerErrorMessage = document.getElementById('register-error-message');
+      const showRegistrationLink = document.getElementById('show-registration');
+      const showLoginLink = document.getElementById('show-login');
+      
+      // initially login is shown.
+      loginForm.style.display = 'block';
+
+      showRegistrationLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        document.getElementById('login-form').style.display = 'none';
+        registrationForm.style.display = 'block';
+    });
+
+    registrationForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const response = await fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          registerErrorMessage.textContent = data.message;
+        } else {
+          registerErrorMessage.textContent = ''; // Clear any previous error messages
+          // Handle successful registration (e.g., redirect to login page)
+          console.log('Registration successful:', data);
+          // For now, let's just log the success. You'd replace this with
+          // redirection or other actions in a real app.
+          alert("Registration Successful!");
+          loginForm.style.display = 'block';
+          registrationForm.style.display = 'none';
+        }
+    });
+    showLoginLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        document.getElementById('login-form').style.display = 'block';
+        registrationForm.style.display = 'none';
+
+    });
+
+
+    // Clear error messages on page load
+    window.addEventListener('load', () => {
+      errorMessage.textContent = '';
+      registerErrorMessage.textContent = '';
+    });
+
+
+    </script>
+    </body>
+</html>

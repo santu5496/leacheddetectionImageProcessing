@@ -17,7 +17,7 @@
   <body>
     
     <h1>Login</h1>
-    <a href="#" id="show-login" style="display: none;">Login</a>
+    <a href="#" id="show-login" style="display: none; margin-bottom: 10px">Login</a>
     <div id="error-message" class="error-message"></div>
     
     <form id="login-form">
@@ -106,11 +106,10 @@
           registerErrorMessage.textContent = data.message;
         } else {
           registerErrorMessage.textContent = ''; // Clear any previous error messages
-          // Handle successful registration (e.g., redirect to login page)
-          console.log('Registration successful:', data);
-          // For now, let's just log the success. You'd replace this with
-          // redirection or other actions in a real app.
-          alert("Registration Successful!");
+          
+          window.location.href = 'home.html';
+          //alert("Registration Successful!");
+          
           loginForm.style.display = 'block';
           registrationForm.style.display = 'none';
         }

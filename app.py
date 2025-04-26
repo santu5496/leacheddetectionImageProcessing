@@ -1,26 +1,24 @@
 import sqlite3
 from sqlite3 import OperationalError
 from flask import Flask, request, jsonify
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image
+#from PIL import Image
 import numpy as np
-import base64
-from leprosynet import create_model
-
+import torch
+import torchvision.transforms as transforms
+from model import CNN
 app = Flask(__name__)
 
 # Database setup
 DATABASE = 'users.db'
 
 # Load the model
-model = create_model()
-# Compile the model (needed for loading)
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 try:
-    model.load_weights('model_weights.h5')
+    model = CNN()
+    #model.load_state_dict(torch.load('model_weights.pth'))
     print("Model weights loaded successfully.")
 except Exception as e:
-    print(f"Error loading model weights: {e}")
+    model = None
+    print(f"Error loading model: {e}")
 
 def get_db():
     db = sqlite3.connect(DATABASE)
@@ -74,6 +72,10 @@ def register():
     except OperationalError:
         return jsonify({'message': 'Database is locked'}), 400
 
+@app.route('/predict', methods=['GET'])
+def predict():
+    return 'ok'
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -81,21 +83,30 @@ def upload_file():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'message': 'No selected file'}), 400
+    if model is None:
+        return jsonify({'message': 'Model not loaded'}), 500
     if file:
         try:
             # Preprocess the image
-            img = image.load_img(file, target_size=(76, 102))
-            img_array = image.img_to_array(img)
-            img_array = np.expand_dims(img_array, axis=0)
-            img_array = img_array / 255.0  # Normalize pixel values
+            img = Image.open(file).convert('RGB').resize((102, 76))
+            img_array = np.array(img)
+
+            # Convert to PyTorch tensor and normalize
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+            tensor = transform(img)
+            tensor = tensor.unsqueeze(0)  # Add a batch dimension
 
             # Make prediction
-            prediction = model.predict(img_array)
-            
+            model.eval()
+            with torch.no_grad():
+                prediction = model(tensor)
+
             # Convert prediction to a simple format
             prediction_result = float(prediction[0][0])
 
             return jsonify({'message': 'File successfully processed', 'prediction': prediction_result}), 200
         except Exception as e:
             return jsonify({'message': f'Error processing file: {str(e)}'}), 500
-    return jsonify({'message': 'File upload error'}), 500

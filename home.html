@@ -7,39 +7,48 @@
 </head>
 <body>
   <h1>Welcome to the Home Page!</h1>
-  <p>This is the main page you see after logging in.</p>
+  <h2>Image upload</h2>
   <form id="upload-form">
-    <input type="file" id="image-upload" name="image" accept="image/*" />
+    <input type="file" id="image-upload" name="file" accept="image/*" />
     <button type="submit">Submit</button>
   </form>
+  <div id="result"></div>
 
   <script>
     const uploadForm = document.getElementById('upload-form');
     const imageUpload = document.getElementById('image-upload');
+    const resultDiv = document.getElementById('result');
 
     uploadForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      resultDiv.textContent = 'Loading...';
 
       const file = imageUpload.files[0];
       if (!file) {
-        alert('Please select an image to upload.');
+        resultDiv.textContent = 'Please select an image to upload.';
         return;
       }
 
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('file', file);
 
-      const response = await fetch('/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const data = await response.text();
-      if (!response.ok) {
-        alert('Error: ' + data);
-      } else {
-        alert('Server response: ' + data);
+        const data = await response.json();
+
+        if (!response.ok) {
+            resultDiv.textContent = 'Error: ' + data.message;
+        } else {
+            resultDiv.textContent = `Server response: ${data.message}. Prediction: ${data.prediction}`;
+        }
+      } catch (error) {
+        resultDiv.textContent = 'Network or Server error. Please try again later.';
       }
+
     });
   </script>
 </body>

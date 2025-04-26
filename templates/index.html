@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+</head>
+<body>
+
+    <h2>Login or Register</h2>
+
+    <form id="login-register-form">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <button type="button" id="login-button">Login</button>
+            <button type="button" id="register-button">Register</button>
+        </div>
+    </form>
+
+    <script>
+        const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
+        const form = document.getElementById('login-register-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        loginButton.addEventListener('click', () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Login successful') {
+                    // Redirect to the home page
+                    window.location.href = '/home';
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            });
+        });
+
+        registerButton.addEventListener('click', () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'User registered successfully') {
+                    alert('Registration successful! You can now log in.');
+                } else {
+                    alert('Registration failed: ' + data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

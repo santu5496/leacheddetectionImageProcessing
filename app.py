@@ -1,12 +1,26 @@
 import sqlite3
 from sqlite3 import OperationalError
 from flask import Flask, request, jsonify
-
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+import numpy as np
+import base64
+from leprosynet import create_model
 
 app = Flask(__name__)
 
 # Database setup
 DATABASE = 'users.db'
+
+# Load the model
+model = create_model()
+# Compile the model (needed for loading)
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+try:
+    model.load_weights('model_weights.h5')
+    print("Model weights loaded successfully.")
+except Exception as e:
+    print(f"Error loading model weights: {e}")
 
 def get_db():
     db = sqlite3.connect(DATABASE)
@@ -31,8 +45,6 @@ def check_user(username, password):
     with get_db() as db:
         cursor = db.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
         return cursor.fetchone() is not None
-        ''')
-        db.commit()
 
 init_db()
 
@@ -62,5 +74,28 @@ def register():
     except OperationalError:
         return jsonify({'message': 'Database is locked'}), 400
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'message': 'No file part in the request'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'message': 'No selected file'}), 400
+    if file:
+        try:
+            # Preprocess the image
+            img = image.load_img(file, target_size=(76, 102))
+            img_array = image.img_to_array(img)
+            img_array = np.expand_dims(img_array, axis=0)
+            img_array = img_array / 255.0  # Normalize pixel values
 
+            # Make prediction
+            prediction = model.predict(img_array)
+            
+            # Convert prediction to a simple format
+            prediction_result = float(prediction[0][0])
 
+            return jsonify({'message': 'File successfully processed', 'prediction': prediction_result}), 200
+        except Exception as e:
+            return jsonify({'message': f'Error processing file: {str(e)}'}), 500
+    return jsonify({'message': 'File upload error'}), 500

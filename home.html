@@ -6,7 +6,41 @@
     <title>Home</title>
 </head>
 <body>
-    <h1>Welcome to the Home Page!</h1>
-    <p>This is the main page you see after logging in.</p>
+  <h1>Welcome to the Home Page!</h1>
+  <p>This is the main page you see after logging in.</p>
+  <form id="upload-form">
+    <input type="file" id="image-upload" name="image" accept="image/*" />
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const uploadForm = document.getElementById('upload-form');
+    const imageUpload = document.getElementById('image-upload');
+
+    uploadForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const file = imageUpload.files[0];
+      if (!file) {
+        alert('Please select an image to upload.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.text();
+      if (!response.ok) {
+        alert('Error: ' + data);
+      } else {
+        alert('Server response: ' + data);
+      }
+    });
+  </script>
 </body>
 </html>

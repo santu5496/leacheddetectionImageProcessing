@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return send_file('src/index.html')
+    return send_file('src/login.html')
 
 def main():
     # Change the port to 5000 or another non-privileged port

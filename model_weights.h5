@@ -1,0 +1,2 @@
+with open("model_weights.h5", "w") as f:
+    pass

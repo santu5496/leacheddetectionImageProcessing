@@ -14,7 +14,7 @@ learning_rate = 0.001
 epochs = 10
 
 # Directory containing images
-dataset_dir = r'C:\Users\hpatil\source\repos\santu5496\leacheddetectionImageProcessing\Dataset1\CO2Wounds-V2 Extended Chronic Wounds Dataset From Leprosy Patients\imgs'
+dataset_dir = r'C:\Users\hpatil\Downloads\archive\CO2Wounds-V2 Extended Chronic Wounds Dataset From Leprosy Patients\split\train'
 
 # Custom dataset class to handle loading images without class-based folder structure
 class CustomImageDataset(Dataset):

@@ -4,843 +4,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leprosy Detection</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        :root {
-            --primary: #1a73e8;
-            --primary-dark: #0d47a1;
-            --secondary: #34a853;
-            --accent: #fbbc05;
-            --warning: #ea4335;
-            --light: #f8f9fa;
-            --dark: #202124;
-            --gray: #5f6368;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--dark);
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
-            min-height: 100vh;
-            padding: 0;
+            font-family: Arial, sans-serif;
             margin: 0;
+            padding: 20px;
         }
-        
         header {
-            background-color: var(--primary);
+            background-color: #1a73e8;
             color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo i {
-            font-size: 2rem;
-        }
-        
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        
-        main {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            main {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .full-width {
-            grid-column: 1 / -1;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-        }
-        
-        .card-header {
-            background: var(--primary);
-            color: white;
-            padding: 15px 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-body {
-            padding: 20px;
-        }
-        
-        .upload-section {
-            text-align: center;
-            padding: 30px 20px;
-        }
-        
-        .upload-zone {
-            border: 2px dashed var(--gray);
-            border-radius: 8px;
-            padding: 40px 20px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-zone:hover {
-            border-color: var(--primary);
-            background-color: rgba(26, 115, 232, 0.05);
-        }
-        
-        .upload-zone i {
-            font-size: 3rem;
-            color: var(--gray);
-            margin-bottom: 15px;
-        }
-        
-        .upload-zone p {
-            color: var(--gray);
-            margin-bottom: 10px;
-        }
-        
-        input[type="file"] {
-            display: none;
-        }
-        
-        .file-label {
-            display: inline-block;
-            background-color: var(--light);
-            color: var(--dark);
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            border: 1px solid var(--gray);
-        }
-        
-        .file-label:hover {
-            background-color: #e2e6ea;
-        }
-        
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 20px auto 0;
-        }
-        
-        button:hover {
-            background: var(--primary-dark);
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: var(--light);
-            border-left: 4px solid var(--primary);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .hidden {
-            display: none;
-        }
-        
-        .loading {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--gray);
-        }
-        
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .info-section h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .info-section p {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        .info-list {
-            list-style-type: none;
-            margin: 15px 0;
-        }
-        
-        .info-list li {
-            margin-bottom: 10px;
-            padding-left: 25px;
-            position: relative;
-        }
-        
-        .info-list li:before {
-            content: "\f058";
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            color: var(--secondary);
-            position: absolute;
-            left: 0;
-        }
-        
-        .warning-list li:before {
-            content: "\f071";
-            color: var(--warning);
-        }
-        
-        .medicine-list li:before {
-            content: "\f484";
-            color: var(--accent);
-        }
-        
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--gray);
-            border-bottom: 2px solid transparent;
-        }
-        
-        .tab.active {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        footer {
-            background-color: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .footer-content p {
-            margin: 10px 0;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-        }
-        
-        .highlight {
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
-        .image-preview {
-            max-width: 100%;
-            max-height: 200px;
-            margin: 15px auto;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        /* Stats and Reports Styles */
-        .stats-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .stats-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .chart-container {
-            position: relative;
-            margin: 20px 0;
-            height: 280px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 10px 0;
-        }
-        
-        .stat-label {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-        
-        .table-container {
-            margin-top: 20px;
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background-color: var(--light);
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
-        tr:hover {
-            background-color: rgba(26, 115, 232, 0.05);
-        }
-        
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 16px;
-            background: var(--light);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-        }
-        
-        .download-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .stats-nav {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .stats-nav button {
-            background: none;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            margin: 0;
-            font-size: 0.9rem;
-        }
-        
-        .stats-nav button.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .stats-nav button:hover:not(.active) {
-            background: rgba(26, 115, 232, 0.1);
-        }
-        
-        .map-container {
-            height: 300px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .map-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .map-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255,255,255,0.9);
             padding: 10px;
-            font-size: 0.9rem;
+            margin-bottom: 20px;
         }
-        .warning-icon {
-            color: var(--warning);
+        .upload-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
         }
-
-        .globe-icon {
-            color: var(--primary);
+        .info-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
         }
-
-        .fa-user-plus {
-            color: var(--warning);
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-left: 3px solid #1a73e8;
+            background-color: #f8f9fa;
+            display: none;
         }
-        .accent-icon {
-            color: var(--accent);
+        .image-preview {
+            max-width: 300px;
+            margin: 10px 0;
+            display: none;
+        }
+        .doctor-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            transition: box-shadow 0.3s ease;
+        }
+        .doctor-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .doctor-card h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #666;
         }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="header-container">
-        <div class="logo">
-            <i class="fas fa-microscope"></i>
-            <h1>Leprosy Detection System</h1>
-        </div>
-    </div>
+    <h1>Leprosy Detection System</h1>
 </header>
 
-<main>
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-upload"></i>
-            Image Analysis
+<div class="upload-container">
+    <h2>Image Analysis</h2>
+    <form id="uploadForm">
+        <div>
+            <p>Upload an image for analysis:</p>
+            <label for="fileInput">Choose an image file:</label>
+            <input type="file" id="fileInput" name="file" accept="image/*" required title="Upload an image file for analysis">
         </div>
-        <div class="card-body">
-            <div class="upload-section">
-                <form id="uploadForm">
-                    <div class="upload-zone" id="dropZone">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Drag and drop an image here or</p>
-                        <label for="fileInput" class="file-label">Select File</label>
-                        <input type="file" id="fileInput" name="file" accept="image/*" required>
-                    </div>
-                    
-                    <img id="imagePreview" class="image-preview" alt="Preview">
-                    
-                    <button type="submit" title="Submit the form">
-                        Submit
-                        <i class="fas fa-search"></i>
-                <div class="result hidden" id="result"></div>
-                    </button>
-                </form>
-                
-                <div class="result hidden" id="result"></div>
-            </div>
+        
+        <img id="imagePreview" class="image-preview" alt="Preview">
+        
+        <div>
+            <button type="submit">Submit for Analysis</button>
         </div>
-    </div>
+    </form>
     
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-info-circle"></i>
-            Leprosy Information
+    <div class="result" id="result"></div>
+</div>
+
+<div class="info-container">
+    <h2>About Leprosy</h2>
+    <p>Leprosy, also known as Hansen's disease, is a chronic infectious disease caused by Mycobacterium leprae. It primarily affects the skin, peripheral nerves, and upper respiratory tract.</p>
+    <p>Early detection and treatment are crucial to prevent complications. Leprosy is curable with multidrug therapy (MDT).</p>
+</div>
+
+<!-- New Doctor Section Starts Here -->
+<div class="info-container">
+    <h2>Top Skin Specialists in Belagavi</h2>
+    <div id="doctorsList">
+
+        <div class="doctor-card">
+            <h3>Dr. Ravi Deshmukh</h3>
+            <p>MBBS, MD (Dermatology)</p>
+            <p>Location: Tilakwadi, Belagavi</p>
+            <p>Rating: ⭐⭐⭐⭐⭐ (4.9/5)</p>
+            <p>Google Reviews: 300+</p>
         </div>
-        <div class="card-body">
-            <div class="tabs">
-                <div class="tab active" data-tab="about">About</div>
-                <div class="tab" data-tab="symptoms">Symptoms</div>
-                <div class="tab" data-tab="treatment">Treatment</div>
-            </div>
-            
-            <div class="tab-content active" id="about">
-                <div class="info-section">
-                    <h3><i class="fas fa-virus"></i> What is Leprosy?</h3>
-                    <p>Leprosy, also known as Hansen's disease, is a chronic infectious disease caused by <span class="highlight">Mycobacterium leprae</span>. It primarily affects the skin, peripheral nerves, mucosal surfaces of the upper respiratory tract, and the eyes.</p>
-                    
-                    <p>Despite common misconceptions, leprosy is not highly contagious. It spreads primarily through droplets from the nose and mouth during close and frequent contact with untreated cases.</p>
-                    
-                    <h3><i class="fas fa-exclamation-triangle"></i> Risk Factors</h3>
-                    <ul class="info-list warning-list">
-                        <li>Living in areas with endemic leprosy</li>
-                        <li>Close contact with untreated leprosy patients</li>
-                        <li>Weakened immune system</li>
-                        <li>Genetic factors</li>
-                        <li>Poor living conditions and malnutrition</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="symptoms">
-                <div class="info-section">
-                    <h3><i class="fas fa-clipboard-list"></i> Common Symptoms</h3>
-                    <p>Leprosy typically develops slowly, with symptoms that may not appear for several years after infection. Early detection and treatment are crucial to prevent complications.</p>
-                    
-                    <ul class="info-list">
-                        <li>Discolored patches of skin (usually flat, pale, or slightly red)</li>
-                        <li>Skin lesions that have decreased sensation to touch, temperature, or pain</li>
-                        <li>Numbness or tingling in hands, arms, feet, and legs</li>
-                        <li>Muscle weakness, especially in hands and feet</li>
-                        <li>Enlarged nerves, especially around elbows, knees, and ankles</li>
-                        <li>Painless wounds or burns on hands or feet</li>
-                    </ul>
-                    
-                    <h3><i class="fas fa-diagnoses"></i> Types of Leprosy</h3>
-                    <p>Leprosy presents in several forms, primarily classified as:</p>
-                    <ul class="info-list">
-                        <li><span class="highlight">Tuberculoid (paucibacillary):</span> Milder form with fewer skin lesions</li>
-                        <li><span class="highlight">Lepromatous (multibacillary):</span> More severe with widespread lesions</li>
-                        <li><span class="highlight">Borderline:</span> Features of both tuberculoid and lepromatous forms</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="treatment">
-                <div class="info-section">
-                    <h3><i class="fas fa-pills"></i> Treatment Options</h3>
-                    <p>Leprosy is curable with multidrug therapy (MDT), which is provided free of charge globally through the World Health Organization (WHO). Early treatment prevents disability and stops transmission.</p>
-                    
-                    <h3><i class="fas fa-prescription-bottle-alt"></i> Medications</h3>
-                    <ul class="info-list medicine-list">
-                        <li><span class="highlight">Dapsone:</span> Prevents bacterial growth</li>
-                        <li><span class="highlight">Rifampin:</span> Kills bacteria</li>
-                        <li><span class="highlight">Clofazimine:</span> Anti-inflammatory and antibacterial properties</li>
-                    </ul>
-                    
-                    <h3><i class="fas fa-calendar-check"></i> Treatment Duration</h3>
-                    <p>Treatment duration depends on the type of leprosy:</p>
-                    <ul class="info-list">
-                        <li>Paucibacillary leprosy: 6 months of MDT</li>
-                        <li>Multibacillary leprosy: 12 months of MDT</li>
-                    </ul>
-                    
-                    <p>Complete treatment is essential to prevent disability, relapse, and drug resistance.</p>
-                </div>
-            </div>
+
+        <div class="doctor-card">
+            <h3>Dr. Sneha Kulkarni</h3>
+            <p>MBBS, MD (Skin & VD)</p>
+            <p>Location: Shahapur, Belagavi</p>
+            <p>Rating: ⭐⭐⭐⭐☆ (4.7/5)</p>
+            <p>Google Reviews: 250+</p>
         </div>
+
+        <div class="doctor-card">
+            <h3>Dr. Rajesh Patil</h3>
+            <p>MBBS, DVD (Dermatology)</p>
+            <p>Location: RPD Cross, Belagavi</p>
+            <p>Rating: ⭐⭐⭐⭐☆ (4.6/5)</p>
+            <p>Google Reviews: 180+</p>
+        </div>
+
+        <div class="doctor-card">
+            <h3>Dr. Megha Joshi</h3>
+            <p>MBBS, MD (Skin)</p>
+            <p>Location: Camp Area, Belagavi</p>
+            <p>Rating: ⭐⭐⭐⭐☆ (4.5/5)</p>
+            <p>Google Reviews: 210+</p>
+        </div>
+
+        <div class="doctor-card">
+            <h3>Dr. Sameer Kamat</h3>
+            <p>MBBS, MD (Dermatology & Cosmetology)</p>
+            <p>Location: Khanapur Road, Belagavi</p>
+            <p>Rating: ⭐⭐⭐⭐☆ (4.8/5)</p>
+            <p>Google Reviews: 190+</p>
+        </div>
+
+        <div class="doctor-card">
+            <h3>Dr. Anjali Hiremath</h3>
+            <p>MBBS, DDVL (Dermatology)</p>
+            <p>Location: Vadgaon, Belagavi</p>
+            <p>Rating: ⭐⭐⭐⭐☆ (4.7/5)</p>
+            <p>Google Reviews: 220+</p>
+        </div>
+
     </div>
-    
-    <!-- New Statistics Section -->
-    <div class="card full-width">
-        <div class="card-header">
-            <i class="fas fa-chart-line"></i>
-            Leprosy Statistics & Reports
-        </div>
-        <div class="card-body">
-            <div class="stats-nav">
-                <button class="stats-tab active" data-stats="global">Global Overview</button>
-                <button class="stats-tab" data-stats="trends">Trends Analysis</button>
-                <button class="stats-tab" data-stats="effectiveness">Treatment Effectiveness</button>
-                <button class="stats-tab" data-stats="regional">Regional Data</button>
-            </div>
-                        <i class="fas fa-user-plus fa-2x warning-icon"></i>
-                        <i class="fas fa-user-plus fa-2x warning-icon"></i>
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <i class="fas fa-user-plus fa-2x" style="color: var(--warning);"></i>
-                        <i class="fas fa-globe-americas fa-2x globe-icon"></i>
-                        <div class="stat-label">New Cases Detected Globally (2023)</div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-globe-americas fa-2x" style="color: var(--primary);"></i>
-                        <div class="stat-number">127</div>
-                        <i class="fas fa-child fa-2x accent-icon"></i>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-child fa-2x" style="color: var(--accent);"></i>
-                        <div class="stat-number">15,245</div>
-                        <div class="stat-label">New Cases Among Children</div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-wheelchair fa-2x" style="color: var(--secondary);"></i>
-                        <div class="stat-number">11,323</div>
-                        <div class="stat-label">New Cases with Grade-2 Disabilities</div>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="globalDistributionChart"></canvas>
-                </div>
-                
-                <p><i class="fas fa-info-circle"></i> <em>Source: World Health Organization Global Leprosy Update, 2023</em></p>
-                
-                <button class="download-btn">
-                    <i class="fas fa-file-pdf"></i>
-                    Download Full WHO Report
-                </button>
-            </div>
-            
-            <div class="stats-content" id="trends">
-                <h3><i class="fas fa-chart-line"></i> Leprosy Trends (2015-2023)</h3>
-                <div class="chart-container">
-                    <canvas id="trendChart"></canvas>
-                </div>
-                
-                <h3><i class="fas fa-th"></i> Age Distribution of New Cases</h3>
-                <div class="chart-container">
-                    <canvas id="ageDistributionChart"></canvas>
-                </div>
-                
-                <p><i class="fas fa-info-circle"></i> <em>Data shows a gradual decline in global cases before the COVID-19 pandemic, followed by an increase in reported cases as healthcare systems recovered.</em></p>
-            </div>
-            
-            <div class="stats-content" id="effectiveness">
-                <h3><i class="fas fa-pills"></i> Treatment Success Rates</h3>
-                <div class="chart-container">
-                    <canvas id="treatmentSuccessChart"></canvas>
-                </div>
-                
-                <h3><i class="fas fa-hospital-user"></i> Relapse Rates After Treatment</h3>
-                <div class="chart-container">
-                    <canvas id="relapseRateChart"></canvas>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Treatment Type</th>
-                                <th>Completion Rate</th>
-                                <th>Cure Rate</th>
-                                <th>Relapse Rate (5 years)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>6-month MDT (PB)</td>
-                                <td>94.2%</td>
-                                <td>98.7%</td>
-                                <td>0.8%</td>
-                            </tr>
-                            <tr>
-                                <td>12-month MDT (MB)</td>
-                                <td>87.9%</td>
-                                <td>97.3%</td>
-                                <td>2.1%</td>
-                            </tr>
-                            <tr>
-                                <td>Alternative Regimen</td>
-                                <td>88.1%</td>
-                                <td>95.6%</td>
-                                <td>3.4%</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="stats-content" id="regional">
-                <h3><i class="fas fa-map-marked-alt"></i> Global Leprosy Distribution</h3>
-                <div class="map-container">
-                    <img src="/api/placeholder/800/400" alt="World map showing leprosy distribution">
-                    <div class="map-overlay">
-                        Distribution of new leprosy cases globally (darker regions indicate higher prevalence)
-                    </div>
-                </div>
-                
-                <h3><i class="fas fa-globe"></i> Top 10 Countries by New Case Detection (2023)</h3>
-                <div class="chart-container">
-                    <canvas id="countriesChart"></canvas>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Country</th>
-                                <th>New Cases</th>
-                                <th>% of Global</th>
-                                <th>Detection Rate<br>(per 100,000)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>India</td>
-                                <td>120,334</td>
-                                <td>57.7%</td>
-                                <td>8.7</td>
-                            </tr>
-                            <tr>
-                                <td>Brazil</td>
-                                <td>28,642</td>
-                                <td>13.7%</td>
-                                <td>13.4</td>
-                            </tr>
-                            <tr>
-                                <td>Indonesia</td>
-                                <td>17,202</td>
-                                <td>8.2%</td>
-                                <td>6.3</td>
-                            </tr>
-                            <tr>
-                                <td>Bangladesh</td>
-                                <td>8,287</td>
-                                <td>4.0%</td>
-                                <td>5.1</td>
-                            </tr>
-                            <tr>
-                                <td>Ethiopia</td>
-                                <td>5,125</td>
-                                <td>2.5%</td>
-                                <td>4.5</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
+</div>
+<!-- New Doctor Section Ends Here -->
 
 <footer>
-    <div class="footer-content">
-        <p>Leprosy Detection System | Early Detection Saves Lives</p>
-        <p>Remember: Leprosy is curable. Early diagnosis and treatment prevent disabilities.</p>
-    </div>
+    <p>Leprosy Detection System | Early Detection Saves Lives</p>
 </footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab functionality
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked tab
-            this.classList.add('active');
-            
-            // Show corresponding content
-            const tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-    
-    // Stats tab functionality
-    const statsTabs = document.querySelectorAll('.stats-tab');
-    statsTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.stats-content').forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked tab
-            this.classList.add('active');
-            
-            // Show corresponding content
-            const tabId = this.getAttribute('data-stats');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-    
     // File input preview
     const fileInput = document.getElementById('fileInput');
     const imagePreview = document.getElementById('imagePreview');
-    const dropZone = document.getElementById('dropZone');
     
     fileInput.addEventListener('change', function() {
-        displayImagePreview(this.files[0]);
-    });
-    
-    // Drag and drop functionality
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        this.style.borderColor = 'var(--primary)';
-        this.style.backgroundColor = 'rgba(26, 115, 232, 0.1)';
-    });
-    
-    dropZone.addEventListener('dragleave', function() {
-        this.style.borderColor = '';
-        this.style.backgroundColor = '';
-    });
-    
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.style.borderColor = '';
-        this.style.backgroundColor = '';
-        
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            displayImagePreview(e.dataTransfer.files[0]);
-        }
-    });
-    
-    function displayImagePreview(file) {
-        if (file && file.type.startsWith('image/')) {
+        if (this.files && this.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 imagePreview.src = e.target.result;
                 imagePreview.style.display = 'block';
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(this.files[0]);
         }
-    }
+    });
     
     // Form submission
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
@@ -850,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const file = fileInput.files[0];
         
         if (!file) {
-            resultDiv.innerHTML = '<div style="color:var(--warning); font-weight:500;"><i class="fas fa-exclamation-circle"></i> Please select an image file.</div>';
+            resultDiv.innerHTML = '<p>Please select an image file.</p>';
             resultDiv.style.display = 'block';
             return;
         }
@@ -858,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('file', file);
         
-        resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Analyzing image...</div>';
+        resultDiv.innerHTML = '<p>Analyzing image...</p>';
         resultDiv.style.display = 'block';
         
         try {
@@ -870,322 +197,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok) {
-                let resultColor = data.prediction.toLowerCase().includes('positive') ? 'var(--warning)' : 'var(--secondary)';
-                
                 resultDiv.innerHTML = `
-                    <h3 style="color:${resultColor}; margin-bottom:10px;">
-                        <i class="fas fa-${data.prediction.toLowerCase().includes('positive') ? 'exclamation-circle' : 'check-circle'}"></i> 
-                        Analysis Result
-                    </h3>
-                    <p><strong>Prediction:</strong> <span style="color:${resultColor}; font-weight:500;">${data.prediction}</span></p>
-                    <p><strong>Confidence:</strong> ${data.confidence_percentage}%</p>
-                    <p><strong>Raw Prediction:</strong> ${data.raw_prediction}</p>
-                    <p style="margin-top:15px; font-size
-                    <p style="margin-top:15px; font-size:0.9rem; color:var(--gray);">
-                        <i class="fas fa-info-circle"></i> Please consult with a healthcare professional for accurate diagnosis.
-                    </p>
+                    <h3>Analysis Result</h3>
+                    <p>Prediction: ${data.prediction}</p>
+                    <p>Confidence: ${data.confidence_percentage}%</p>
+                    <p>Please consult with a healthcare professional for accurate diagnosis.</p>
                 `;
             } else {
-                resultDiv.innerHTML = `<div style="color:var(--warning);"><i class="fas fa-exclamation-triangle"></i> ${data.message}</div>`;
+                resultDiv.innerHTML = `<p>Error: ${data.message}</p>`;
             }
         } catch (error) {
             console.error('Error:', error);
-            resultDiv.innerHTML = '<div style="color:var(--warning);"><i class="fas fa-exclamation-triangle"></i> An error occurred while processing your request. Please try again.</div>';
-        }
-    });
-    
-    // Charts initialization
-    // Global Distribution Chart
-    const globalCtx = document.getElementById('globalDistributionChart').getContext('2d');
-    const globalDistributionChart = new Chart(globalCtx, {
-        type: 'pie',
-        data: {
-            labels: ['South-East Asia', 'Americas', 'Africa', 'Western Pacific', 'Eastern Mediterranean', 'Europe'],
-            datasets: [{
-                label: 'New Case Distribution by WHO Region',
-                data: [71.4, 16.2, 8.1, 3.5, 0.7, 0.1],
-                backgroundColor: [
-                    'rgba(26, 115, 232, 0.8)',
-                    'rgba(52, 168, 83, 0.8)',
-                    'rgba(251, 188, 5, 0.8)',
-                    'rgba(234, 67, 53, 0.8)',
-                    'rgba(66, 133, 244, 0.8)',
-                    'rgba(219, 68, 55, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(26, 115, 232, 1)',
-                    'rgba(52, 168, 83, 1)',
-                    'rgba(251, 188, 5, 1)',
-                    'rgba(234, 67, 53, 1)',
-                    'rgba(66, 133, 244, 1)',
-                    'rgba(219, 68, 55, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                },
-                title: {
-                    display: true,
-                    text: 'Global Distribution of New Leprosy Cases by WHO Region (%)',
-                    font: {
-                        size: 16
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.parsed}%`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-    
-    // Trend Chart
-    const trendCtx = document.getElementById('trendChart').getContext('2d');
-    const trendChart = new Chart(trendCtx, {
-        type: 'line',
-        data: {
-            labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'],
-            datasets: [{
-                label: 'Global New Cases',
-                data: [210758, 214783, 210671, 208641, 202185, 127396, 140594, 174087, 208619],
-                borderColor: 'rgba(26, 115, 232, 1)',
-                backgroundColor: 'rgba(26, 115, 232, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Global Trend of New Leprosy Cases (2015-2023)',
-                    font: {
-                        size: 16
-                    }
-                },
-                tooltip: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'Number of New Cases'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Year'
-                    }
-                }
-            }
-        }
-    });
-    
-    // Age Distribution Chart
-    const ageDistCtx = document.getElementById('ageDistributionChart').getContext('2d');
-    const ageDistributionChart = new Chart(ageDistCtx, {
-        type: 'bar',
-        data: {
-            labels: ['0-14 years', '15-24 years', '25-34 years', '35-44 years', '45-54 years', '55-64 years', '65+ years'],
-            datasets: [{
-                label: 'Percentage of Cases',
-                data: [7.3, 12.8, 17.5, 18.7, 18.3, 15.2, 10.2],
-                backgroundColor: 'rgba(52, 168, 83, 0.7)',
-                borderColor: 'rgba(52, 168, 83, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Age Distribution of New Leprosy Cases',
-                    font: {
-                        size: 16
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Percentage (%)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Age Group'
-                    }
-                }
-            }
-        }
-    });
-    
-    // Treatment Success Chart
-    const treatmentCtx = document.getElementById('treatmentSuccessChart').getContext('2d');
-    const treatmentSuccessChart = new Chart(treatmentCtx, {
-        type: 'horizontalBar',
-        type: 'bar', // Fallback for newer Chart.js versions
-        data: {
-            labels: ['Multibacillary', 'Paucibacillary', 'Overall'],
-            datasets: [{
-                label: 'Treatment Completion Rate',
-                data: [87.9, 94.2, 90.4],
-                backgroundColor: 'rgba(251, 188, 5, 0.7)',
-                borderColor: 'rgba(251, 188, 5, 1)',
-                borderWidth: 1
-            }, {
-                label: 'Cure Rate',
-                data: [97.3, 98.7, 97.9],
-                backgroundColor: 'rgba(26, 115, 232, 0.7)',
-                borderColor: 'rgba(26, 115, 232, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y', // For newer Chart.js versions
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Treatment Success Rates by Type',
-                    font: {
-                        size: 16
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Percentage (%)'
-                    }
-                }
-            }
-        }
-    });
-    
-    // Relapse Rate Chart
-    const relapseCtx = document.getElementById('relapseRateChart').getContext('2d');
-    const relapseRateChart = new Chart(relapseCtx, {
-        type: 'line',
-        data: {
-            labels: ['1 year', '2 years', '3 years', '4 years', '5 years', '10 years'],
-            datasets: [{
-                label: 'PB Leprosy',
-                data: [0.1, 0.2, 0.4, 0.6, 0.8, 1.2],
-                borderColor: 'rgba(52, 168, 83, 1)',
-                backgroundColor: 'transparent',
-                borderWidth: 3,
-                tension: 0.3
-            }, {
-                label: 'MB Leprosy',
-                data: [0.3, 0.7, 1.2, 1.7, 2.1, 3.5],
-                borderColor: 'rgba(26, 115, 232, 1)',
-                backgroundColor: 'transparent',
-                borderWidth: 3,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Cumulative Relapse Rates After Completing Treatment',
-                    font: {
-                        size: 16
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Relapse Rate (%)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Time After Treatment Completion'
-                    }
-                }
-            }
-        }
-    });
-    
-    // Countries Chart
-    const countriesCtx = document.getElementById('countriesChart').getContext('2d');
-    const countriesChart = new Chart(countriesCtx, {
-        type: 'bar',
-        data: {
-            labels: ['India', 'Brazil', 'Indonesia', 'Bangladesh', 'Ethiopia', 'DR Congo', 'Nepal', 'Myanmar', 'Philippines', 'Tanzania'],
-            datasets: [{
-                label: 'New Cases',
-                data: [120334, 28642, 17202, 8287, 5125, 4513, 3640, 2866, 2248, 1865],
-                backgroundColor: 'rgba(26, 115, 232, 0.7)',
-                borderColor: 'rgba(26, 115, 232, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Top 10 Countries by New Leprosy Case Detection (2023)',
-                    font: {
-                        size: 16
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Number of New Cases'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Country'
-                    },
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                }
-            }
+            resultDiv.innerHTML = '<p>An error occurred while processing your request. Please try again.</p>';
         }
     });
 });
